@@ -1,10 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const bodyParser = require('body-parser');
+const { User } = require('./models/User');
+const config = require('./config/key');
 
 const port = 5000;
 
-mongoose.connect('mongodb+srv://abest82_db_user:CVDe7prEmXJJOgGK@cluster0.2vwu18g.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+
+mongoose.connect(config.mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
@@ -14,5 +20,13 @@ mongoose.connect('mongodb+srv://abest82_db_user:CVDe7prEmXJJOgGK@cluster0.2vwu18
 
 
 app.get('/', (req, res) => res.send('Hello World'));
+
+app.post('/register', (req, res) => {
+    const user = new User(req.body);
+    user.save((err, userInfo) => {
+        if(err) return res.json({success: false, err});
+        return res.status(200).json({success: true});
+    })
+})
 
 app.listen(port, () => console.log(`Server is running on port ${port}`));
